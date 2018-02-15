@@ -484,6 +484,8 @@
                      * - template {String} - id of ng-template, url for partial, plain string (if enabled)
                      * - plain {Boolean} - enable plain string templates, default false
                      * - scope {Object}
+                     * - component {String}
+                     * - bindings {Object}
                      * - controller {String}
                      * - controllerAs {String}
                      * - className {String} - dialog theme class
@@ -534,6 +536,14 @@
                         angular.forEach(resolve, function (value, key) {
                             resolve[key] = angular.isString(value) ? $injector.get(value) : $injector.invoke(value, null, null, key);
                         });
+
+                        if (options.component) {
+                            var components = $injector.get(options.component + 'Directive')
+
+                            if (components.length) {
+                                angular.extend(options, components[0])
+                            }
+                        }
 
                         $q.all({
                             template: loadTemplate(options.template || options.templateUrl),
@@ -654,6 +664,10 @@
 
                                 if(options.bindToController) {
                                     angular.extend(controllerInstance.instance, {ngDialogId: scope.ngDialogId, ngDialogData: scope.ngDialogData, closeThisDialog: scope.closeThisDialog, confirm: scope.confirm});
+                                }
+
+                                if (options.bindings) {
+                                    angular.extend(controllerInstance.instance, options.bindings)
                                 }
 
                                 if(typeof controllerInstance === 'function'){
